@@ -171,6 +171,14 @@ class OpenSandboxBackend(BackendBase):
         when available, but falls back to a tiny local adapter to avoid
         hard dependency on the SDK during tests.
 
+        Note:
+            ``mode`` must be the decimal integer whose digits spell the
+            octal permission (e.g. ``644``), matching the SDK's own
+            default of ``755``. Passing ``0o644`` (decimal ``420``) makes
+            execd parse ``420`` as an octal mode, which yields the wrong
+            permissions and fails with "permission denied" on the second
+            write to the same file.
+
         Args:
             path (`str`):
                 Destination path inside the sandbox.
@@ -184,9 +192,9 @@ class OpenSandboxBackend(BackendBase):
         try:
             from opensandbox.models.filesystem import WriteEntry
 
-            return WriteEntry(path=path, data=data, mode=0o644)
+            return WriteEntry(path=path, data=data, mode=644)
         except Exception:  # noqa: BLE001
-            return _WriteEntry(path=path, data=data, mode=0o644)
+            return _WriteEntry(path=path, data=data, mode=644)
 
     @staticmethod
     def _make_run_opts(cwd: str, timeout: float | None) -> Any:
